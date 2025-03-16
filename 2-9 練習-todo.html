@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2-9 練習-todo</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+      }
+
+      .todo-container {
+        background-color: #fff;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        width: 400px;
+      }
+
+      .todo-header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .todo-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      .todo-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .todo-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .todo-item:last-child {
+        border-bottom: none;
+      }
+
+      .todo-item.completed {
+        text-decoration: line-through;
+        color: #999;
+      }
+
+      .todo-checkbox {
+        margin-right: 10px;
+      }
+
+      .todo-add {
+        margin-left: auto;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .todo-delete {
+        margin-left: auto;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="todo-container">
+        <div class="todo-header">
+          <h1>Todo List</h1>
+        </div>
+        <input
+          type="text"
+          class="todo-input"
+          placeholder="新增代辦事項"
+          v-model="Listname"
+          @keydown.enter="addTodo"
+        />
+        <button @click="addTodo" class="todo-add">新增一筆代辦事項</button>
+        <ul class="todo-list">
+          <li
+            class="todo-item"
+            :class="{ completed: todo.completed }"
+            v-for="todo in todoList"
+            :key="todo.id"
+          >
+            <input
+              type="checkbox"
+              class="todo-checkbox"
+              v-model="todo.completed"
+            />
+            {{ todo.text }}
+            <button @click="deleteTodo(todo)" class="todo-delete">
+              Delete
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <script type="module">
+      import {
+        createApp,
+        ref,
+      } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+      const todosString = localStorage.getItem("todos");
+      const todos = todosString ? JSON.parse(todosString) : {};
+      createApp({
+        setup() {
+          const todoList = ref(todos);
+
+          const Listname = ref("");
+
+          const addTodo = () => {
+            if (Listname.value.trim() === "") return; // Prevent adding empty todos
+            todoList.value.push({
+              id: Date.now(),
+              text: Listname.value,
+              completed: false,
+            });
+            Listname.value = ""; // Clear the input field
+          };
+
+          const deleteTodo = (todo) => {
+            const index = todoList.value.indexOf(todo);
+            if (index !== -1) {
+              todoList.value.splice(index, 1);
+            }
+          };
+
+          watch(
+            todoList,
+            () => {
+              localStorage.setItem("todos", JSON.stringify(todoList.value));
+            },
+            { deep: true }
+          );
+
+          return { todoList, Listname, addTodo, deleteTodo };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>
